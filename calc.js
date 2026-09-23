@@ -81,14 +81,26 @@
         if (!result.ok) errors.push(result.message);
       });
       if (units.ok && manual.ok) {
-        row.manualWeekly = units.value * manual.value;
-        manualTotal += row.manualWeekly;
+        var manualWeekly = units.value * manual.value;
+        if (isFinite(manualWeekly)) {
+          row.manualWeekly = manualWeekly;
+          manualTotal += manualWeekly;
+        } else {
+          row.errors.manual = label + ": manual minutes per week is too large to calculate.";
+          errors.push(row.errors.manual);
+        }
       }
       if (units.ok && human.ok) {
-        row.humanWeekly = units.value * human.value;
-        humanTaskTotal += row.humanWeekly;
+        var humanWeekly = units.value * human.value;
+        if (isFinite(humanWeekly)) {
+          row.humanWeekly = humanWeekly;
+          humanTaskTotal += humanWeekly;
+        } else {
+          row.errors.human = label + ": human minutes per week is too large to calculate.";
+          errors.push(row.errors.human);
+        }
       }
-      if (!units.ok || !manual.ok || !human.ok) tasksComplete = false;
+      if (row.errors.units || row.errors.manual || row.errors.human) tasksComplete = false;
       rows.push(row);
     });
 
@@ -102,7 +114,11 @@
       }
     });
 
-    var complete = tasksComplete && maintenance.ok && linkedin.ok && setup.ok;
+    var complete = tasksComplete && maintenance.ok && linkedin.ok && setup.ok &&
+      isFinite(manualTotal) && isFinite(humanTaskTotal);
+    if (!complete && tasksComplete && maintenance.ok && linkedin.ok && setup.ok) {
+      errors.push("Weekly totals are too large to calculate.");
+    }
     var model = {
       rows: rows,
       errors: errors,
@@ -114,6 +130,12 @@
       linkedin: linkedin.ok ? linkedin.value : null,
       setup: setup.ok ? setup.value : null
     };
+
+    if (complete && !isFinite(humanTaskTotal + maintenance.value + linkedin.value)) {
+      complete = false;
+      model.complete = false;
+      errors.push("Weekly totals are too large to calculate.");
+    }
 
     if (complete) {
       model.humanTotal = humanTaskTotal + maintenance.value + linkedin.value;

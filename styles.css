@@ -161,7 +161,8 @@ input.invalid { border-color: var(--danger); background: #fdf1f1; }
 .chart-label { font-size: 0.88rem; margin-bottom: 5px; display: flex; justify-content: space-between; gap: 12px; }
 .chart-label .vals { color: var(--muted); font-variant-numeric: tabular-nums; }
 .bar-track { height: 13px; border-radius: 3px; background: #eef1f5; margin-bottom: 4px; overflow: hidden; }
-.bar { height: 100%; border-radius: 3px; min-width: 2px; }
+.bar { height: 100%; border-radius: 3px; }
+.bar.positive { min-width: 2px; }
 .bar.before { background: var(--accent); }
 .bar.after { background: var(--after); }
 .bar.overhead { background: var(--overhead); }
