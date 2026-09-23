@@ -25,6 +25,14 @@
     return Calc.compute(state);
   }
 
+  /* A row's note describes its initial numbers, so hide it once the row is edited. */
+  function matchesInitial(task) {
+    return INITIAL.tasks.some(function (initial) {
+      return initial.name === task.name && initial.unit === task.unit &&
+        initial.units === task.units && initial.manual === task.manual && initial.human === task.human;
+    });
+  }
+
   function buildSummary() {
     return Calc.buildSummary(state);
   }
@@ -115,7 +123,7 @@
       render({ skipTable: true });
     });
     td.appendChild(input);
-    if (key === "name" && task.note) {
+    if (key === "name" && task.note && matchesInitial(task)) {
       var note = document.createElement("span");
       note.className = "cell-note";
       note.textContent = task.note;
@@ -221,6 +229,7 @@
         var bar = document.createElement("div");
         bar.className = "bar " + (entry.kind === "overhead" ? "overhead" : pair[0]);
         var value = pair[1] == null ? 0 : pair[1];
+        if (value > 0) bar.className += " positive";
         bar.style.width = Math.max(0, (value / max) * 100) + "%";
         track.appendChild(bar);
         row.appendChild(track);

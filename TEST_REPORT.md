@@ -2,7 +2,7 @@
 
 ## Automated calculation tests
 
-`node --test test/calc.test.js` — 15 tests, all passing.
+`node --test test/calc.test.js` — 17 tests, all passing.
 
 | Check | Expected | Result |
 | --- | --- | --- |

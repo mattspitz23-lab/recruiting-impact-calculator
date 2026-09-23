@@ -109,6 +109,33 @@ test("full precision is preserved; rounding only at display", () => {
   assert.equal(one.percent.toFixed(1), "87.5");
 });
 
+test("overflowing weekly products are rejected instead of producing Infinity", () => {
+  const s = state();
+  s.tasks[0].units = "1e308";
+  s.tasks[0].manual = "1e308";
+  const m = Calc.compute(s);
+  assert.equal(m.complete, false);
+  assert.equal(m.rows[0].manualWeekly, null);
+  assert.match(m.rows[0].errors.manual, /too large to calculate/);
+  assert.equal(m.savedMinutes, undefined);
+  assert.match(Calc.buildSummary(s), /summary unavailable/);
+});
+
+test("overflowing weekly totals are rejected", () => {
+  const s = {
+    tasks: [
+      { name: "A", unit: "u", units: "1", manual: "1e308", human: "0" },
+      { name: "B", unit: "u", units: "1", manual: "1e308", human: "0" }
+    ],
+    maintenance: "0",
+    linkedin: "0",
+    setup: "0"
+  };
+  const m = Calc.compute(s);
+  assert.equal(m.complete, false);
+  assert.match(m.errors.join(" "), /Weekly totals are too large to calculate/);
+});
+
 test("adding and removing tasks changes totals", () => {
   const added = state();
   added.tasks.push({ name: "New task", unit: "Item", units: "10", manual: "6", human: "1" });
