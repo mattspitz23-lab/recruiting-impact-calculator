@@ -97,9 +97,9 @@ h1 { font-size: 1.9rem; margin: 8px 0 10px; line-height: 1.2; }
   font-size: 0.92rem;
 }
 
-.table-scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.table-scroll { position: relative; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
 
-table { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 0.93rem; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.93rem; }
 th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--line); }
 thead th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); vertical-align: bottom; }
 .num, td.num, th.num { text-align: right; }
@@ -115,6 +115,7 @@ td input[type="text"], td input[type="number"] {
   color: inherit;
 }
 td input[type="number"] { text-align: right; min-width: 88px; }
+td input[type="text"] { min-width: 150px; }
 input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 input.invalid { border-color: var(--danger); background: #fdf1f1; }
 
@@ -184,11 +185,6 @@ input.invalid { border-color: var(--danger); background: #fdf1f1; }
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
   color: var(--muted);
-}
-
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
 @media (max-width: 860px) {

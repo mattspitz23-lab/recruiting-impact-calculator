@@ -9,6 +9,17 @@
   var fmtHoursMinutes = Calc.fmtHoursMinutes;
 
   var state = null;
+  var badInput = {};
+
+  function noteBadInput(key, input) {
+    if (input.validity && input.validity.badInput) badInput[key] = true;
+    else delete badInput[key];
+  }
+
+  function messageFor(key, fallback) {
+    if (!badInput[key] || !fallback) return fallback;
+    return fallback.replace(/ is required\.$/, " must be a number.");
+  }
 
   function compute() {
     return Calc.compute(state);
@@ -78,6 +89,7 @@
     input.setAttribute("aria-label", (task.name || "Task " + (index + 1)) + " " + key);
     if (errorText) input.classList.add("invalid");
     input.addEventListener("input", function () {
+      noteBadInput(index + ":" + key, input);
       state.tasks[index][key] = input.value;
       save();
       render({ skipTable: true });
@@ -140,6 +152,7 @@
       remove.textContent = "Remove";
       remove.setAttribute("aria-label", "Remove " + (task.name || "task " + (index + 1)));
       remove.addEventListener("click", function () {
+        badInput = {};
         state.tasks.splice(index, 1);
         save();
         render();
@@ -151,8 +164,10 @@
     });
   }
 
-  function updateRow(tr, row) {
-    [[2, row.errors.units], [3, row.errors.manual], [4, row.errors.human]].forEach(function (pair) {
+  function updateRow(tr, row, index) {
+    [[2, messageFor(index + ":units", row.errors.units)],
+      [3, messageFor(index + ":manual", row.errors.manual)],
+      [4, messageFor(index + ":human", row.errors.human)]].forEach(function (pair) {
       var td = tr.children[pair[0]];
       var input = td.querySelector("input");
       var msg = td.querySelector(".cell-error");
@@ -263,7 +278,7 @@
         : model.errors.length + " inputs need attention: " + model.errors.join(" ");
     }
     ["maintenance", "linkedin", "setup"].forEach(function (key) {
-      var message = model.fieldErrors[key];
+      var message = messageFor(key, model.fieldErrors[key]);
       var node = document.querySelector('[data-error-for="' + key + '"]');
       node.hidden = !message;
       node.textContent = message || "";
@@ -279,7 +294,7 @@
     } else {
       model.rows.forEach(function (row, index) {
         var tr = el.taskBody.children[index];
-        if (tr) updateRow(tr, row);
+        if (tr) updateRow(tr, row, index);
       });
     }
     renderResults(model);
@@ -324,6 +339,7 @@
     ["maintenance", "linkedin", "setup"].forEach(function (key) {
       el[key].value = state[key];
       el[key].addEventListener("input", function () {
+        noteBadInput(key, el[key]);
         state[key] = el[key].value;
         save();
         render({ skipTable: true });
@@ -331,6 +347,7 @@
     });
 
     el.addTask.addEventListener("click", function () {
+      badInput = {};
       state.tasks.push({ name: "New task", unit: "Item", units: "1", manual: "0", human: "0" });
       save();
       render();
@@ -340,6 +357,7 @@
 
     el.reset.addEventListener("click", function () {
       state = clone(INITIAL);
+      badInput = {};
       save();
       ["maintenance", "linkedin", "setup"].forEach(function (key) { el[key].value = state[key]; });
       render();
