@@ -37,6 +37,16 @@ Served with `python3 -m http.server 8000`.
 - Reset to initial estimates restores all six rows and the three overhead inputs.
 - Copy summary places the plain-text summary on the clipboard.
 - Inputs persist across a page refresh (localStorage) and reset clears back to defaults.
-- Mobile width (375 px): results stack, table scrolls horizontally, controls remain reachable.
+- Mobile width (375 px): results stack, only the task table scrolls horizontally
+  (`document.documentElement.scrollWidth === clientWidth === 360`), controls remain reachable.
+- Typing a non-numeric value (`e`) shows "must be a number" inline and in the banner; results show
+  Incomplete.
+- No console errors.
 
-Browser results were captured in the session recording attached to the pull request.
+Two issues were found and fixed during browser testing: page-level horizontal overflow at 375 px
+(caused by a visually-hidden `<span>` positioned against the initial containing block inside the
+wide table) and clipped default task names in the name/unit inputs.
+
+Not covered: a physical mobile device — mobile checks used Chrome viewport emulation.
+
+Browser results were captured in the session recordings attached to the pull request.
