@@ -267,7 +267,23 @@
     }
   }
 
+  function visibleErrors(model) {
+    var messages = [];
+    model.rows.forEach(function (row, index) {
+      ["units", "manual", "human"].forEach(function (key) {
+        var message = messageFor(index + ":" + key, row.errors[key]);
+        if (message) messages.push(message);
+      });
+    });
+    ["maintenance", "linkedin", "setup"].forEach(function (key) {
+      var message = messageFor(key, model.fieldErrors[key]);
+      if (message) messages.push(message);
+    });
+    return messages;
+  }
+
   function renderErrors(model) {
+    model.errors = visibleErrors(model);
     if (model.errors.length === 0) {
       el.errorBanner.hidden = true;
       el.errorBanner.textContent = "";
