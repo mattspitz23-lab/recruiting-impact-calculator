@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recruiting Bot Impact Calculator</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<main class="wrap">
+  <header class="page-head">
+    <p class="badge">Personal estimates — not yet measured.</p>
+    <h1>Recruiting Bot Impact Calculator</h1>
+    <p class="lede">
+      This calculator estimates how much <strong>active human time per week</strong> a personal recruiting
+      workflow (OpenAI, Notion, n8n, Gmail, Clay) saves compared with doing the same weekly workload by hand.
+      It covers company research, job monitoring and filtering, contact/email research, outreach drafts, and
+      follow-ups. Edit any number below; results update immediately.
+    </p>
+  </header>
+
+  <section class="results" aria-label="Results">
+    <div class="result-card primary">
+      <h2>Net time saved per week</h2>
+      <p class="result-value" id="savedValue">—</p>
+      <p class="result-sub" id="savedSub">Manual minus current human time</p>
+    </div>
+    <div class="result-card">
+      <h2>Reduction in active human work</h2>
+      <p class="result-value" id="pctValue">—</p>
+      <p class="result-sub" id="pctSub">Share of manual effort removed</p>
+    </div>
+    <div class="result-card">
+      <h2>Weeks to recover setup time</h2>
+      <p class="result-value" id="paybackValue">—</p>
+      <p class="result-sub" id="paybackSub">One-time setup ÷ weekly savings</p>
+    </div>
+  </section>
+
+  <p class="error-banner" id="errorBanner" role="alert" hidden></p>
+
+  <section aria-labelledby="tasks-head">
+    <h2 id="tasks-head" class="section-head">Tasks</h2>
+    <p class="section-note">
+      “Human minutes/unit with bot” is the time you still spend: review, corrections, and remaining manual work.
+    </p>
+    <div class="table-scroll">
+      <table id="taskTable">
+        <thead>
+          <tr>
+            <th scope="col">Task</th>
+            <th scope="col">Unit</th>
+            <th scope="col" class="num">Units / week</th>
+            <th scope="col" class="num">Manual min / unit</th>
+            <th scope="col" class="num">Human min / unit with bot</th>
+            <th scope="col" class="num">Manual min / week</th>
+            <th scope="col" class="num">Human min / week</th>
+            <th scope="col"><span class="sr-only">Remove</span></th>
+          </tr>
+        </thead>
+        <tbody id="taskBody"></tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="5">Task totals</th>
+            <td class="num" id="totalManual">—</td>
+            <td class="num" id="totalHuman">—</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="row-actions">
+      <button type="button" id="addTask" class="btn">+ Add task</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="overhead-head">
+    <h2 id="overhead-head" class="section-head">Additional weekly and one-time effort</h2>
+    <div class="fields">
+      <div class="field">
+        <label for="maintenance">Maintenance minutes per week</label>
+        <input type="number" id="maintenance" min="0" step="any" inputmode="decimal" />
+        <p class="hint">Fixing broken runs, tweaking prompts and workflows.</p>
+        <p class="field-error" data-error-for="maintenance" hidden></p>
+      </div>
+      <div class="field">
+        <label for="linkedin">Additional LinkedIn research / manual sending minutes per week</label>
+        <input type="number" id="linkedin" min="0" step="any" inputmode="decimal" />
+        <p class="hint">
+          <strong>Provisional assumption — adjust freely.</strong> Most LinkedIn research and sending time is
+          already counted in the contact research and outreach rows; this input covers only <em>additional</em> time.
+        </p>
+        <p class="field-error" data-error-for="linkedin" hidden></p>
+      </div>
+      <div class="field">
+        <label for="setup">One-time recruiting-bot setup (hours)</label>
+        <input type="number" id="setup" min="0" step="any" inputmode="decimal" />
+        <p class="hint">Building the workflow once, counted against weekly savings.</p>
+        <p class="field-error" data-error-for="setup" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="chart-head">
+    <h2 id="chart-head" class="section-head">Before / after, by task</h2>
+    <p class="section-note">
+      Manual (before) vs. current human time (after) in minutes per week. Maintenance and additional LinkedIn
+      time appear as separate rows of current human effort with no manual counterpart.
+    </p>
+    <div id="chart" class="chart"></div>
+    <p class="legend">
+      <span class="swatch before"></span> Manual (before)
+      <span class="swatch after"></span> Current human (after)
+      <span class="swatch overhead"></span> Overhead (current only)
+    </p>
+  </section>
+
+  <section class="toolbar" aria-label="Actions">
+    <button type="button" id="reset" class="btn">Reset to initial estimates</button>
+    <button type="button" id="copy" class="btn btn-primary">Copy summary</button>
+    <span id="copyStatus" class="copy-status" role="status"></span>
+  </section>
+
+  <section aria-labelledby="formula-head" class="notes">
+    <h2 id="formula-head" class="section-head">How the numbers are calculated</h2>
+    <ul class="formulas">
+      <li>Manual weekly minutes = Σ (units/week × manual minutes/unit)</li>
+      <li>Current weekly human minutes = Σ (units/week × human minutes/unit with bot) + maintenance + additional LinkedIn</li>
+      <li>Net weekly minutes saved = manual weekly minutes − current weekly human minutes</li>
+      <li>Reduction % = net weekly minutes saved ÷ manual weekly minutes × 100</li>
+      <li>Setup payback weeks = setup hours ÷ (net weekly minutes saved ÷ 60)</li>
+    </ul>
+    <p>
+      Values are computed at full precision and rounded only for display. Career-page monitoring keeps its exact
+      0.125 minutes per check (40 checks = 20 companies checked twice weekly = 5 minutes total per week).
+    </p>
+  </section>
+
+  <section aria-labelledby="caveat-head" class="notes">
+    <h2 id="caveat-head" class="section-head">What this does and does not show</h2>
+    <ul>
+      <li>The comparison estimates the manual effort for the <em>same</em> weekly workload and assumes comparable output quality.</li>
+      <li>It does not establish that I previously spent exactly that much time, nor that output quality has been verified.</li>
+      <li>Only active human time is counted — review, correction, and maintenance — not unattended bot runtime, and without double counting.</li>
+      <li>Results are estimates based on the assumptions entered here, not verified productivity gains. No claim is made about interviews, offers, or hiring outcomes.</li>
+      <li>Inputs are saved in this browser via local storage. They do not sync to other devices and do not change what other visitors see.</li>
+    </ul>
+  </section>
+
+  <footer class="page-foot">Personal estimates — not yet measured.</footer>
+</main>
+<script src="calc.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
